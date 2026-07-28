@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>À la femme que j'aime</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,700&family=Italiana&family=Parisienne&display=swap" rel="stylesheet">
+<style>
+/* ============ RESET & TOKENS ============ */
+:root{
+  --cream:#FBF4EC;
+  --cream-2:#F5E8DD;
+  --blush:#F3DCD8;
+  --rose:#B76B76;
+  --rose-deep:#8E3E4C;
+  --gold:#A97C33;
+  --gold-soft:#CDA05C;
+  --ink:#4A3630;
+  --ink-soft:#8A6F63;
+  --card-bg:rgba(255,252,248,0.6);
+  --card-border:rgba(169,124,51,0.3);
+  --serif:'Playfair Display', serif;
+  --script:'Italiana', serif;
+  --signature-font:'Parisienne', cursive;
+  --body:'Cormorant Garamond', serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:linear-gradient(165deg, #FDF8F2 0%, #F7E9DE 45%, #F3DEDA 100%);
+  color:var(--ink);
+  font-family:var(--body);
+  overflow-x:hidden;
+  position:relative;
+  min-height:100vh;
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+}
+::selection{background:var(--rose-deep); color:#fff;}
+:focus-visible{outline:2px solid var(--gold); outline-offset:3px;}
+
+/* ============ AMBIENT PETALS / LIGHT BACKGROUND ============ */
+#petals-canvas{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+}
+.vignette{
+  position:fixed; inset:0; z-index:1; pointer-events:none;
+  background:radial-gradient(ellipse at center, transparent 45%, rgba(120,75,60,0.07) 100%);
+}
+.grain{
+  position:fixed; inset:0; z-index:2; pointer-events:none; opacity:0.02;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============ PROGRESS BAR ============ */
+#progress-wrap{
+  position:fixed; top:0; left:0; right:0; height:3px; z-index:50;
+  background:rgba(140,90,70,0.08);
+}
+#progress-bar{
+  height:100%; width:0%;
+  background:linear-gradient(90deg, var(--rose-deep), var(--gold));
+  box-shadow:0 0 12px rgba(169,124,51,0.5);
+  transition:width 0.25s ease-out;
+}
+
+/* ============ MUSIC TOGGLE ============ */
+#music-toggle{
+  position:fixed; bottom:24px; right:24px; z-index:50;
+  width:56px; height:56px; border-radius:50%;
+  background:rgba(255,252,248,0.8);
+  border:1px solid var(--card-border);
+  backdrop-filter:blur(10px);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:22px;
+  transition:transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow:0 4px 20px rgba(140,90,70,0.18);
+}
+#music-toggle:hover{ transform:scale(1.08); box-shadow:0 4px 28px rgba(169,124,51,0.3);}
+#music-toggle.playing{ animation:pulse-ring 2s ease-in-out infinite;}
+@keyframes pulse-ring{
+  0%,100%{ box-shadow:0 0 0 0 rgba(169,124,51,0.3);}
+  50%{ box-shadow:0 0 0 10px rgba(169,124,51,0);}
+}
+
+/* ============ LAYOUT ============ */
+.wrap{ position:relative; z-index:5; max-width:760px; margin:0 auto; padding:0 24px;}
+section{ padding:120px 0; position:relative;}
+
+/* ============ HERO ============ */
+.hero{
+  min-height:100vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; text-align:center;
+  padding:80px 24px;
+}
+.hero-eyebrow{
+  font-family:var(--script);
+  letter-spacing:0.35em; text-transform:uppercase;
+  font-size:12px; color:var(--rose-deep); opacity:0;
+  animation:fade-up 1.2s ease forwards; animation-delay:0.2s;
+}
+.hero-title{
+  font-family:var(--serif); font-weight:700; font-style:italic;
+  font-size:clamp(32px, 6.6vw, 60px);
+  margin:18px 0 20px; line-height:1.15;
+  color:var(--ink);
+  opacity:0; animation:fade-up 1.2s ease forwards; animation-delay:0.5s;
+}
+.hero-title .heart{ color:var(--rose-deep); font-style:normal; display:inline-block;}
+.hero-names{
+  font-family:var(--signature-font); font-size:clamp(20px,3.4vw,29px);
+  color:var(--rose-deep); margin:2px 0 22px; letter-spacing:0.01em;
+  opacity:0; animation:fade-up 1.2s ease forwards; animation-delay:0.75s;
+}
+.hero-names .heart-sep{ color:var(--gold); font-size:0.75em; margin:0 6px; }
+.hero-sub{
+  font-size:clamp(17px,2.4vw,21px); line-height:1.8; color:var(--ink-soft);
+  max-width:600px; font-weight:400;
+  opacity:0; animation:fade-up 1.2s ease forwards; animation-delay:1.0s;
+}
+.hero-scroll{
+  margin-top:60px; font-family:var(--script); letter-spacing:0.2em; font-size:12px;
+  color:var(--gold); opacity:0; animation:fade-up 1.2s ease forwards, bob 2.4s ease-in-out infinite 2.5s;
+  animation-delay:1.5s, 2.2s;
+  text-transform:uppercase;
+}
+@keyframes fade-up{ from{opacity:0; transform:translateY(24px);} to{opacity:1; transform:translateY(0);} }
+@keyframes bob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(8px);} }
+
+/* signature heart-constellation svg drawn under hero */
+.constellation{ width:min(230px,55vw); margin:8px auto 0; opacity:0; animation:fade-up 1.4s ease forwards; animation-delay:1.15s;}
+.constellation path{
+  fill:none; stroke:var(--gold); stroke-width:1.4; stroke-linecap:round;
+  stroke-dasharray:600; stroke-dashoffset:600;
+  animation:draw-heart 2.6s ease forwards 1.3s;
+  filter:drop-shadow(0 0 3px rgba(169,124,51,0.35));
+}
+@keyframes draw-heart{ to{ stroke-dashoffset:0; } }
+
+/* ============ SECTION TITLES ============ */
+.section-eyebrow{
+  font-family:var(--script); letter-spacing:0.3em; text-transform:uppercase;
+  font-size:12px; color:var(--rose-deep); display:block; margin-bottom:10px;
+}
+.section-title{
+  font-family:var(--serif); font-weight:700; font-size:clamp(23px,3.8vw,32px);
+  margin-bottom:14px; color:var(--ink);
+}
+.section-lead{
+  color:var(--ink-soft); font-size:18px; line-height:1.8; margin-bottom:44px; max-width:600px;
+}
+.divider{
+  width:64px; height:1px; margin:0 0 40px;
+  background:linear-gradient(90deg, var(--gold), transparent);
+}
+
+/* letter intro block */
+.letter-card{
+  background:var(--card-bg); border:1px solid var(--card-border); border-radius:3px;
+  padding:44px clamp(24px,5vw,56px); backdrop-filter:blur(8px);
+  position:relative; box-shadow:0 20px 50px -30px rgba(140,80,70,0.35);
+}
+.letter-card::before{
+  content:'❝'; position:absolute; top:-8px; left:20px; font-family:var(--serif);
+  font-size:64px; color:var(--rose-deep); opacity:0.3;
+}
+.letter-text{ font-size:clamp(18px,2.4vw,21px); line-height:1.95; color:var(--ink-soft); font-style:italic;}
+.letter-text strong{ color:var(--rose-deep); font-weight:500; font-style:normal;}
+
+/* ============ REVEAL ON SCROLL ============ */
+.reveal{ opacity:1; transform:none; transition:opacity 0.9s ease, transform 0.9s ease;}
+body.js-anim .reveal{ opacity:0; transform:translateY(36px); }
+body.js-anim .reveal.in{ opacity:1; transform:translateY(0);}
+
+/* ============ QUESTION CARDS ============ */
+.card{
+  background:var(--card-bg); border:1px solid var(--card-border);
+  border-radius:3px; padding:clamp(24px,4vw,40px); margin-bottom:40px;
+  backdrop-filter:blur(8px); position:relative; overflow:hidden;
+  box-shadow:0 20px 50px -34px rgba(140,80,70,0.3);
+}
+.card::after{
+  content:''; position:absolute; top:0; left:0; width:2px; height:0;
+  background:linear-gradient(180deg,var(--rose-deep),var(--gold));
+  transition:height 0.6s ease;
+}
+.card.in::after{ height:100%; }
+.options-grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:12px; margin-top:8px;
+}
+.option{
+  display:flex; align-items:center; gap:12px;
+  padding:13px 16px; border:1px solid rgba(140,90,70,0.16); border-radius:2px;
+  cursor:pointer; transition:border-color 0.3s ease, background 0.3s ease, transform 0.15s ease;
+  font-size:16px; color:var(--ink-soft); user-select:none;
+  background:rgba(255,255,255,0.3);
+}
+.option:hover{ border-color:var(--gold); background:rgba(169,124,51,0.08);}
+.option:active{ transform:scale(0.98); }
+.option input[type=checkbox]{
+  appearance:none; -webkit-appearance:none;
+  width:19px; height:19px; min-width:19px; border-radius:50%;
+  border:1.5px solid var(--gold); position:relative; cursor:pointer;
+  transition:all 0.3s ease;
+}
+.option input[type=checkbox]:checked{
+  background:var(--rose-deep); border-color:var(--rose-deep);
+  box-shadow:0 0 10px rgba(142,62,76,0.5);
+}
+.option input[type=checkbox]:checked::after{
+  content:'♥'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:11px; color:#fff; top:-1px;
+}
+.option.checked{ border-color:var(--gold); background:rgba(169,124,51,0.12); color:var(--ink); }
+.option-other{
+  grid-column:1/-1; display:flex; align-items:center; gap:12px;
+  padding:13px 16px; border:1px dashed rgba(140,90,70,0.28); border-radius:2px;
+}
+.option-other input[type=text]{
+  flex:1; background:transparent; border:none; border-bottom:1px solid rgba(140,90,70,0.3);
+  color:var(--ink); font-family:var(--body); font-size:16px; padding:4px 2px; outline:none;
+}
+.option-other input[type=text]:focus{ border-bottom-color:var(--gold); }
+.option-other input[type=text]::placeholder{ color:rgba(138,111,99,0.55); }
+
+textarea{
+  width:100%; background:rgba(255,255,255,0.4); border:1px solid rgba(140,90,70,0.2);
+  border-radius:2px; color:var(--ink); font-family:var(--body); font-size:17px;
+  padding:16px 18px; min-height:110px; resize:vertical; outline:none;
+  transition:border-color 0.3s ease, background 0.3s ease;
+  line-height:1.7;
+}
+textarea:focus{ border-color:var(--gold); background:rgba(255,255,255,0.6); }
+textarea::placeholder{ color:rgba(138,111,99,0.55); font-style:italic; }
+
+/* ============ FINAL SECTION ============ */
+.finale{
+  text-align:center; padding:140px 0 160px;
+  background:radial-gradient(ellipse at 50% 30%, rgba(224,166,166,0.28), transparent 70%);
+}
+.finale-text{
+  font-family:var(--serif); font-style:italic; font-weight:500;
+  font-size:clamp(20px,3.2vw,28px); line-height:1.75; color:var(--ink);
+  max-width:640px; margin:0 auto 56px;
+}
+.finale-buttons{ display:flex; flex-direction:column; gap:18px; align-items:center; max-width:440px; margin:0 auto;}
+.btn{
+  width:100%; padding:20px 28px; border-radius:2px; cursor:pointer;
+  font-family:var(--serif); font-size:17px; letter-spacing:0.02em;
+  border:1px solid var(--gold); background:rgba(255,255,255,0.35); color:var(--ink);
+  transition:all 0.35s ease; position:relative; overflow:hidden;
+}
+.btn span{ position:relative; z-index:2; }
+.btn::before{
+  content:''; position:absolute; inset:0; transform:scaleX(0); transform-origin:left;
+  background:linear-gradient(90deg, var(--rose-deep), var(--gold));
+  transition:transform 0.4s ease; z-index:1;
+}
+.btn:hover::before{ transform:scaleX(1); }
+.btn:hover{ border-color:transparent; color:#FFF8F0; }
+.btn-primary{ background:linear-gradient(90deg,var(--rose-deep),var(--rose)); border-color:transparent; color:#FFF8F0; font-weight:600;}
+.btn-primary::before{ background:linear-gradient(90deg, var(--gold), var(--gold-soft)); }
+.btn-primary:hover{ color:var(--ink); }
+
+.improve-box{
+  max-width:600px; margin:28px auto 0; text-align:left;
+  opacity:0; max-height:0; overflow:hidden; transition:all 0.5s ease;
+}
+.improve-box.open{ opacity:1; max-height:400px; }
+
+.thankyou{
+  margin-top:60px; opacity:0; max-height:0; overflow:hidden; transition:all 0.8s ease;
+  font-family:var(--serif); font-style:italic; font-size:clamp(18px,2.6vw,23px);
+  line-height:1.8; color:var(--rose-deep); max-width:600px; margin-left:auto; margin-right:auto;
+}
+.thankyou.open{ opacity:1; max-height:400px; margin-top:60px; }
+
+/* ============ SEND FORM SECTION ============ */
+.send-section{ text-align:center; }
+.send-note{ color:var(--ink-soft); font-size:15px; margin-top:16px; font-style:italic; }
+.send-confirm{
+  color:var(--rose-deep); font-family:var(--serif); font-style:italic;
+  font-size:17px; margin-top:20px; opacity:0; max-height:0; overflow:hidden;
+  transition:all 0.6s ease;
+}
+.send-confirm.open{ opacity:1; max-height:100px; }
+.btn:disabled{ opacity:0.75; cursor:default; }
+.btn:disabled:hover::before{ transform:scaleX(0); }
+.btn:disabled:hover{ border-color:var(--gold); color:var(--ink); }
+
+/* ============ SIGNATURE / CLOSING ============ */
+.signature-section{ text-align:center; padding:70px 24px 100px; }
+.signature-names{
+  font-family:var(--signature-font); font-size:clamp(24px,4vw,34px);
+  color:var(--rose-deep); margin-bottom:14px;
+}
+.signature-names .heart-sep{ color:var(--gold); font-size:0.7em; margin:0 8px; }
+.signature-quote{
+  font-family:var(--serif); font-style:italic; font-size:15px;
+  color:var(--ink-soft); letter-spacing:0.01em; max-width:440px; margin:0 auto;
+}
+
+/* ============ CONFETTI canvas layer for burst ============ */
+#confetti-canvas{ position:fixed; inset:0; z-index:100; pointer-events:none; }
+
+@media (max-width:600px){
+  section{ padding:90px 0; }
+  .letter-card{ padding:30px 20px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="petals-canvas"></canvas>
+<div class="vignette"></div>
+<div class="grain"></div>
+<canvas id="confetti-canvas"></canvas>
+
+<div id="progress-wrap"><div id="progress-bar"></div></div>
+
+<button id="music-toggle" aria-label="Activer la musique romantique" title="Musique">🎵</button>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <span class="hero-eyebrow">Pour toi, et pour nous</span>
+  <h1 class="hero-title">À la femme que j'aime <span class="heart">❤️</span></h1>
+  <p class="hero-names">Raphaël Sambou MACALOU <span class="heart-sep">❤️</span> Estère SANOGO</p>
+  <svg class="constellation" viewBox="0 0 100 90">
+    <path d="M50 82 C 10 55, 2 25, 25 12 C 42 3, 50 20, 50 20 C 50 20, 58 3, 75 12 C 98 25, 90 55, 50 82 Z"/>
+  </svg>
+  <p class="hero-sub">Une lettre. Quelques questions. Et un avenir à écrire ensemble, si tu le veux bien.</p>
+  <span class="hero-scroll">Fais défiler ↓</span>
+</section>
+
+<div class="wrap">
+
+  <!-- ============ INTRO LETTER ============ -->
+  <section>
+    <div class="letter-card reveal">
+      <p class="letter-text">Nous sommes déjà ensemble, mais aujourd'hui je ne veux pas simplement être ton copain.
+      Je veux savoir si toi aussi tu as envie de construire <strong>quelque chose de sérieux</strong> avec moi.
+      Je veux qu'on avance main dans la main, qu'on se choisisse chaque jour, qu'on traverse les bons comme les
+      mauvais moments ensemble. Avant de continuer, j'aimerais connaître ce que tu attends de notre histoire.</p>
+    </div>
+  </section>
+
+  <!-- ============ Q1 ============ -->
+  <section>
+    <span class="section-eyebrow reveal">Question 01</span>
+    <h2 class="section-title reveal">❤️ Ce que tu attends de moi</h2>
+    <div class="divider reveal"></div>
+    <div class="card reveal" data-group="attentes">
+      <div class="options-grid" data-checklist>
+        <label class="option"><input type="checkbox" value="Être fidèle"><span>Être fidèle</span></label>
+        <label class="option"><input type="checkbox" value="Être honnête"><span>Être honnête</span></label>
+        <label class="option"><input type="checkbox" value="Bien communiquer avec toi"><span>Bien communiquer avec toi</span></label>
+        <label class="option"><input type="checkbox" value="Toujours te respecter"><span>Toujours te respecter</span></label>
+        <label class="option"><input type="checkbox" value="Te soutenir dans les moments difficiles"><span>Te soutenir dans les moments difficiles</span></label>
+        <label class="option"><input type="checkbox" value="Te faire rire"><span>Te faire rire</span></label>
+        <label class="option"><input type="checkbox" value="Être romantique"><span>Être romantique</span></label>
+        <label class="option"><input type="checkbox" value="Être attentionné"><span>Être attentionné</span></label>
+        <label class="option"><input type="checkbox" value="Être patient"><span>Être patient</span></label>
+        <label class="option"><input type="checkbox" value="Être ambitieux"><span>Être ambitieux</span></label>
+        <label class="option"><input type="checkbox" value="Construire un avenir avec toi"><span>Construire un avenir avec toi</span></label>
+        <label class="option"><input type="checkbox" value="Te mettre en confiance"><span>Te mettre en confiance</span></label>
+        <label class="option"><input type="checkbox" value="Être présent quand tu as besoin de moi"><span>Être présent quand tu as besoin de moi</span></label>
+      </div>
+      <div class="option-other">
+        <span>Autre :</span>
+        <input type="text" placeholder="Écris ici..." data-other>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Q2 ============ -->
+  <section>
+    <span class="section-eyebrow reveal">Question 02</span>
+    <h2 class="section-title reveal">🥰 Ce qui te fait te sentir aimée</h2>
+    <div class="divider reveal"></div>
+    <div class="card reveal" data-group="amour">
+      <div class="options-grid" data-checklist>
+        <label class="option"><input type="checkbox" value="Les câlins"><span>Les câlins</span></label>
+        <label class="option"><input type="checkbox" value="Les compliments"><span>Les compliments</span></label>
+        <label class="option"><input type="checkbox" value="Les petites attentions"><span>Les petites attentions</span></label>
+        <label class="option"><input type="checkbox" value="Les surprises"><span>Les surprises</span></label>
+        <label class="option"><input type="checkbox" value="Les appels et messages"><span>Les appels et messages</span></label>
+        <label class="option"><input type="checkbox" value="Passer du temps ensemble"><span>Passer du temps ensemble</span></label>
+        <label class="option"><input type="checkbox" value="Les cadeaux"><span>Les cadeaux</span></label>
+        <label class="option"><input type="checkbox" value="Les sorties à deux"><span>Les sorties à deux</span></label>
+        <label class="option"><input type="checkbox" value="Les actes plus que les paroles"><span>Les actes plus que les paroles</span></label>
+        <label class="option"><input type="checkbox" value="Les bisous"><span>Les bisous</span></label>
+        <label class="option"><input type="checkbox" value="Les mots doux"><span>Les mots doux</span></label>
+      </div>
+      <div class="option-other">
+        <span>Autre :</span>
+        <input type="text" placeholder="Écris ici..." data-other>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Q3 ============ -->
+  <section>
+    <span class="section-eyebrow reveal">Question 03</span>
+    <h2 class="section-title reveal">💕 Les qualités que tu aimerais que je garde ou développe</h2>
+    <div class="divider reveal"></div>
+    <div class="card reveal" data-group="qualites">
+      <div class="options-grid" data-checklist>
+        <label class="option"><input type="checkbox" value="Plus de communication"><span>Plus de communication</span></label>
+        <label class="option"><input type="checkbox" value="Plus de patience"><span>Plus de patience</span></label>
+        <label class="option"><input type="checkbox" value="Plus de romantisme"><span>Plus de romantisme</span></label>
+        <label class="option"><input type="checkbox" value="Plus d'écoute"><span>Plus d'écoute</span></label>
+        <label class="option"><input type="checkbox" value="Plus de confiance"><span>Plus de confiance</span></label>
+        <label class="option"><input type="checkbox" value="Plus de complicité"><span>Plus de complicité</span></label>
+        <label class="option"><input type="checkbox" value="Plus de maturité"><span>Plus de maturité</span></label>
+        <label class="option"><input type="checkbox" value="Plus d'humour"><span>Plus d'humour</span></label>
+        <label class="option"><input type="checkbox" value="Plus de soutien"><span>Plus de soutien</span></label>
+      </div>
+      <div class="option-other">
+        <span>Autre :</span>
+        <input type="text" placeholder="Écris ici..." data-other>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Q4 ============ -->
+  <section>
+    <span class="section-eyebrow reveal">Question 04</span>
+    <h2 class="section-title reveal">🚫 Les choses que tu ne veux jamais dans notre relation</h2>
+    <div class="divider reveal"></div>
+    <div class="card reveal" data-group="jamais">
+      <div class="options-grid" data-checklist>
+        <label class="option"><input type="checkbox" value="Les mensonges"><span>Les mensonges</span></label>
+        <label class="option"><input type="checkbox" value="L'infidélité"><span>L'infidélité</span></label>
+        <label class="option"><input type="checkbox" value="Le manque de respect"><span>Le manque de respect</span></label>
+        <label class="option"><input type="checkbox" value="Les insultes"><span>Les insultes</span></label>
+        <label class="option"><input type="checkbox" value="Le manque de communication"><span>Le manque de communication</span></label>
+        <label class="option"><input type="checkbox" value="Les promesses non tenues"><span>Les promesses non tenues</span></label>
+        <label class="option"><input type="checkbox" value="La violence verbale ou physique"><span>La violence verbale ou physique</span></label>
+        <label class="option"><input type="checkbox" value="La jalousie excessive"><span>La jalousie excessive</span></label>
+        <label class="option"><input type="checkbox" value="Les secrets importants"><span>Les secrets importants</span></label>
+      </div>
+      <div class="option-other">
+        <span>Autre :</span>
+        <input type="text" placeholder="Écris ici..." data-other>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Q5 free text ============ -->
+  <section>
+    <span class="section-eyebrow reveal">Question 05</span>
+    <h2 class="section-title reveal">🌍 Comment imagines-tu notre avenir ?</h2>
+    <div class="divider reveal"></div>
+    <div class="card reveal">
+      <textarea id="q-avenir" placeholder="Écris librement ici, comme tu le sens..."></textarea>
+    </div>
+  </section>
+
+  <!-- ============ Q6 free text ============ -->
+  <section>
+    <span class="section-eyebrow reveal">Question 06</span>
+    <h2 class="section-title reveal">💌 Qu'aimerais-tu que je sache sur toi ou sur ce que tu ressens ?</h2>
+    <div class="divider reveal"></div>
+    <div class="card reveal">
+      <textarea id="q-ressens" placeholder="Tout ce que tu veux partager..."></textarea>
+    </div>
+  </section>
+
+  <!-- ============ Q7 free text ============ -->
+  <section>
+    <span class="section-eyebrow reveal">Question 07</span>
+    <h2 class="section-title reveal">❤️ Quel est ton plus grand rêve pour notre couple ?</h2>
+    <div class="divider reveal"></div>
+    <div class="card reveal">
+      <textarea id="q-reve" placeholder="Ton plus beau rêve, à deux..."></textarea>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ FINALE ============ -->
+<section class="finale">
+  <div class="wrap">
+    <p class="finale-text reveal">Après tout ce que nous avons vécu, veux-tu continuer cette aventure avec moi et
+    construire un avenir à mes côtés ? Je ne te promets pas une relation parfaite, mais je te promets un homme
+    qui fera toujours de son mieux pour nous, qui apprendra de ses erreurs et qui ne cessera jamais de te choisir. ❤️</p>
+
+    <div class="finale-buttons reveal">
+      <button class="btn btn-primary" data-choice="oui-coeur"><span>❤️ Oui, de tout mon cœur.</span></button>
+      <button class="btn" data-choice="oui-parlons"><span>🤍 Oui, mais parlons aussi de ce que nous pouvons améliorer ensemble.</span></button>
+      <button class="btn btn-primary" data-choice="oui-avenir"><span>💍 Oui, je veux qu'on construise un bel avenir ensemble.</span></button>
+    </div>
+
+    <div class="improve-box" id="improve-box">
+      <div class="card">
+        <p style="color:var(--ink-soft); margin-bottom:14px; font-style:italic;">Dis-moi ce que tu aimerais qu'on améliore ensemble :</p>
+        <textarea id="q-ameliorer" placeholder="Tes attentes pour qu'on avance encore mieux..."></textarea>
+      </div>
+    </div>
+
+    <div class="thankyou" id="thankyou">
+      Merci de continuer à écrire cette histoire avec moi. Je te promets de te respecter, de t'écouter, de te
+      soutenir, de grandir avec toi et de faire chaque jour de notre relation un endroit où nous nous sentirons
+      aimés et en sécurité. Je t'aime plus que les mots ne peuvent l'exprimer. ❤️
+    </div>
+  </div>
+</section>
+
+<!-- ============ SEND ============ -->
+<section class="send-section">
+  <div class="wrap">
+    <span class="section-eyebrow reveal">Dernière étape</span>
+    <h2 class="section-title reveal">Envoie-moi tes réponses</h2>
+    <div class="divider reveal" style="margin-left:auto;margin-right:auto;"></div>
+    <button class="btn btn-primary reveal" id="send-btn" style="max-width:360px;margin:0 auto;display:block;">
+      <span>Envoyer mes réponses ❤️</span>
+    </button>
+    <p class="send-note reveal">Un simple clic suffit : tes réponses me parviennent directement.</p>
+    <p class="send-confirm" id="send-confirm">Merci ❤️ Tes réponses m'ont bien été envoyées.</p>
+  </div>
+</section>
+
+<!-- ============ SIGNATURE ============ -->
+<section class="signature-section">
+  <div class="wrap" style="text-align:center;">
+    <div class="divider reveal" style="margin:0 auto 28px;"></div>
+    <p class="signature-names reveal">Raphaël Sambou MACALOU <span class="heart-sep">❤️</span> Estère SANOGO</p>
+    <p class="signature-quote reveal">Une histoire écrite avec le cœur, par Raphaël Sambou MACALOU pour Estère SANOGO ❤️</p>
+  </div>
+</section>
+
+<script>
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xaqrvolz";
+
+/* Envoie les réponses à Formspree (visibles dans ton tableau de bord
+   Formspree ou par e-mail). */
+async function sendToFormspree(payload){
+  try{
+    await fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  }catch(err){
+    console.error('Formspree: envoi impossible', err);
+  }
+}
+
+(function(){
+  const canvas = document.getElementById('petals-canvas');
+  const ctx = canvas.getContext('2d');
+  let petals = [], sparkles = [], w, h, t = 0;
+
+  const petalColors = [
+    'rgba(183,107,118,0.32)',
+    'rgba(224,166,166,0.30)',
+    'rgba(205,160,92,0.28)',
+    'rgba(142,62,76,0.22)'
+  ];
+
+  function resize(){
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = document.documentElement.scrollHeight;
+
+    const area = w*h;
+    const petalCount = Math.min(46, Math.max(14, Math.floor(area/48000)));
+    const sparkleCount = Math.min(30, Math.max(8, Math.floor(area/70000)));
+
+    petals = [];
+    for(let i=0;i<petalCount;i++){
+      petals.push({
+        x: Math.random()*w,
+        y: Math.random()*h,
+        size: Math.random()*9 + 7,
+        rot: Math.random()*360,
+        vr: (Math.random()-0.5)*0.4,
+        vy: Math.random()*0.25 + 0.09,
+        swayAmp: Math.random()*22 + 10,
+        swaySpeed: Math.random()*0.4 + 0.15,
+        swayPhase: Math.random()*Math.PI*2,
+        baseX: 0,
+        color: petalColors[Math.floor(Math.random()*petalColors.length)]
+      });
+    }
+    petals.forEach(p=> p.baseX = p.x);
+
+    sparkles = [];
+    for(let i=0;i<sparkleCount;i++){
+      sparkles.push({
+        x: Math.random()*w,
+        y: Math.random()*h,
+        r: Math.random()*1.8 + 0.8,
+        phase: Math.random()*Math.PI*2,
+        speed: Math.random()*0.4 + 0.15
+      });
+    }
+  }
+
+  function drawPetal(p){
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.rot*Math.PI/180);
+    ctx.beginPath();
+    ctx.moveTo(0,-p.size);
+    ctx.bezierCurveTo(p.size*0.7,-p.size*0.5, p.size*0.7,p.size*0.5, 0,p.size);
+    ctx.bezierCurveTo(-p.size*0.7,p.size*0.5, -p.size*0.7,-p.size*0.5, 0,-p.size);
+    ctx.closePath();
+    ctx.fillStyle = p.color;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawSparkle(s){
+    const alpha = 0.15 + 0.25 * (0.5 + 0.5*Math.sin(t*s.speed + s.phase));
+    const grad = ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r*6);
+    grad.addColorStop(0, `rgba(205,160,92,${alpha})`);
+    grad.addColorStop(1, 'rgba(205,160,92,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r*6, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  function draw(){
+    t += 0.01;
+    ctx.clearRect(0,0,w,h);
+
+    sparkles.forEach(drawSparkle);
+
+    petals.forEach(p=>{
+      p.y += p.vy;
+      p.rot += p.vr;
+      p.x = p.baseX + Math.sin(t*p.swaySpeed + p.swayPhase) * p.swayAmp;
+      if(p.y > h + 20){ p.y = -20; p.baseX = Math.random()*w; }
+      drawPetal(p);
+    });
+
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  window.addEventListener('load', () => setTimeout(resize, 300));
+  resize();
+  draw();
+})();
+
+(function(){
+  const bar = document.getElementById('progress-bar');
+  function update(){
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? (scrollTop/docHeight)*100 : 0;
+    bar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', update);
+  window.addEventListener('resize', update);
+  update();
+})();
+
+(function(){
+  const items = document.querySelectorAll('.reveal');
+  if(!items.length) return;
+
+  if('IntersectionObserver' in window){
+    document.body.classList.add('js-anim');
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, {threshold:0.1, rootMargin:'0px 0px -5% 0px'});
+    items.forEach(i=>io.observe(i));
+
+    setTimeout(()=>{
+      items.forEach(i=>i.classList.add('in'));
+    }, 4000);
+  }
+})();
+
+document.querySelectorAll('.option').forEach(opt=>{
+  const cb = opt.querySelector('input[type=checkbox]');
+  if(!cb) return;
+  cb.addEventListener('change', ()=> opt.classList.toggle('checked', cb.checked));
+});
+
+(function(){
+  const btn = document.getElementById('music-toggle');
+  let ctxAudio, playing = false, nodes = [];
+
+  function startAmbient(){
+    ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+    const master = ctxAudio.createGain();
+    master.gain.value = 0.05;
+    master.connect(ctxAudio.destination);
+
+    const freqs = [196.0, 261.6, 329.6];
+    freqs.forEach((f, i)=>{
+      const osc = ctxAudio.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      const g = ctxAudio.createGain();
+      g.gain.value = 0;
+      osc.connect(g); g.connect(master);
+      osc.start();
+      const now = ctxAudio.currentTime;
+      g.gain.linearRampToValueAtTime(0.6, now + 3 + i);
+      nodes.push({osc, g});
+
+      const lfo = ctxAudio.createOscillator();
+      lfo.frequency.value = 0.15 + i*0.05;
+      const lfoGain = ctxAudio.createGain();
+      lfoGain.gain.value = 1.5;
+      lfo.connect(lfoGain); lfoGain.connect(osc.frequency);
+      lfo.start();
+      nodes.push({osc:lfo});
+    });
+  }
+  function stopAmbient(){
+    nodes.forEach(n=>{ try{ n.osc.stop(); }catch(e){} });
+    nodes = [];
+    if(ctxAudio) ctxAudio.close();
+  }
+  btn.addEventListener('click', ()=>{
+    playing = !playing;
+    btn.classList.toggle('playing', playing);
+    btn.textContent = playing ? '🎶' : '🎵';
+    if(playing) startAmbient(); else stopAmbient();
+  });
+})();
+
+(function(){
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let running = false;
+
+  function resize(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const shapes = ['❤','🌹','✨','💛'];
+  function burst(){
+    for(let i=0;i<90;i++){
+      particles.push({
+        x: Math.random()*canvas.width,
+        y: -20 - Math.random()*canvas.height*0.3,
+        vx: (Math.random()-0.5)*2,
+        vy: Math.random()*2 + 1.5,
+        rot: Math.random()*360,
+        vr: (Math.random()-0.5)*6,
+        size: Math.random()*14 + 12,
+        shape: shapes[Math.floor(Math.random()*shapes.length)],
+        life: 0,
+        maxLife: 260 + Math.random()*120
+      });
+    }
+    if(!running){ running = true; loop(); }
+  }
+  function loop(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(p=>{
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life++;
+      ctx.save();
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.rot*Math.PI/180);
+      ctx.globalAlpha = Math.max(0, 1 - p.life/p.maxLife);
+      ctx.font = p.size + 'px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(p.shape, 0, 0);
+      ctx.restore();
+    });
+    particles = particles.filter(p=> p.life < p.maxLife && p.y < canvas.height + 40);
+    if(particles.length){ requestAnimationFrame(loop); }
+    else { running = false; ctx.clearRect(0,0,canvas.width,canvas.height); }
+  }
+  window.loveBurst = burst;
+})();
+
+let finalChoiceLabel = '';
+document.querySelectorAll('[data-choice]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const choice = btn.dataset.choice;
+    const improveBox = document.getElementById('improve-box');
+    const thankyou = document.getElementById('thankyou');
+
+    if(choice === 'oui-parlons'){
+      improveBox.classList.toggle('open');
+      finalChoiceLabel = btn.textContent.trim();
+      thankyou.classList.remove('open');
+    } else {
+      finalChoiceLabel = btn.textContent.trim();
+      window.loveBurst();
+      thankyou.classList.add('open');
+      thankyou.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+  });
+});
+
+function collectGroup(groupName){
+  const card = document.querySelector(`[data-group="${groupName}"]`);
+  const checked = Array.from(card.querySelectorAll('input[type=checkbox]:checked')).map(cb=>cb.value);
+  const other = card.querySelector('[data-other]').value.trim();
+  if(other) checked.push(other);
+  return checked;
+}
+
+document.getElementById('send-btn').addEventListener('click', ()=>{
+  const attentes = collectGroup('attentes');
+  const amour = collectGroup('amour');
+  const qualites = collectGroup('qualites');
+  const jamais = collectGroup('jamais');
+  const avenir = document.getElementById('q-avenir').value.trim();
+  const ressens = document.getElementById('q-ressens').value.trim();
+  const reve = document.getElementById('q-reve').value.trim();
+  const ameliorer = document.getElementById('q-ameliorer').value.trim();
+
+  const lines = [];
+  lines.push('💌 *Mes réponses à ta lettre* 💌');
+  lines.push('');
+  if(finalChoiceLabel){
+    lines.push(`✨ *Ma réponse :* ${finalChoiceLabel}`);
+    lines.push('');
+  }
+  lines.push('❤️ *Ce que j\'attends de toi :*');
+  lines.push(attentes.length ? attentes.map(x=>'• '+x).join('\n') : '(rien de coché)');
+  lines.push('');
+  lines.push('🥰 *Ce qui me fait me sentir aimée :*');
+  lines.push(amour.length ? amour.map(x=>'• '+x).join('\n') : '(rien de coché)');
+  lines.push('');
+  lines.push('💕 *Qualités à garder ou développer :*');
+  lines.push(qualites.length ? qualites.map(x=>'• '+x).join('\n') : '(rien de coché)');
+  lines.push('');
+  lines.push('🚫 *Ce que je ne veux jamais :*');
+  lines.push(jamais.length ? jamais.map(x=>'• '+x).join('\n') : '(rien de coché)');
+  lines.push('');
+  lines.push('🌍 *Comment j\'imagine notre avenir :*');
+  lines.push(avenir || '(non renseigné)');
+  lines.push('');
+  lines.push('💌 *Ce que j\'aimerais que tu saches :*');
+  lines.push(ressens || '(non renseigné)');
+  lines.push('');
+  lines.push('❤️ *Mon plus grand rêve pour nous :*');
+  lines.push(reve || '(non renseigné)');
+  if(ameliorer){
+    lines.push('');
+    lines.push('🤍 *Ce qu\'on pourrait améliorer ensemble :*');
+    lines.push(ameliorer);
+  }
+  lines.push('');
+  lines.push('Avec tout mon cœur. ❤️');
+
+  const message = lines.join('\n');
+
+  const sendBtn = document.getElementById('send-btn');
+  sendBtn.disabled = true;
+  sendBtn.querySelector('span').textContent = 'Envoi en cours...';
+
+  sendToFormspree({
+    reponse_finale: finalChoiceLabel || '(non choisie)',
+    ce_qu_elle_attend_de_moi: attentes.join(', ') || '(rien de coché)',
+    ce_qui_la_fait_se_sentir_aimee: amour.join(', ') || '(rien de coché)',
+    qualites_a_garder_ou_developper: qualites.join(', ') || '(rien de coché)',
+    ce_qu_elle_ne_veut_jamais: jamais.join(', ') || '(rien de coché)',
+    comment_elle_imagine_notre_avenir: avenir || '(non renseigné)',
+    ce_qu_elle_aimerait_que_je_sache: ressens || '(non renseigné)',
+    son_plus_grand_reve_pour_nous: reve || '(non renseigné)',
+    ce_qu_on_pourrait_ameliorer: ameliorer || '',
+    message_complet: message
+  }).then(()=>{
+    sendBtn.querySelector('span').textContent = 'Envoyé ❤️';
+    document.getElementById('send-confirm').classList.add('open');
+    window.loveBurst();
+  });
+});
+</script>
+
+</body>
+</html>
